@@ -30,5 +30,6 @@ func Execute() {
 func printHelp() {
 	fmt.Println("Usage:")
 	fmt.Println("  lolcli analyze -c <champion> -r <region>")
+	fmt.Println("  lolcli profile -p <player-name> -t <player-tag> -r <region>")
 	fmt.Println("  lolcli help")
 }

@@ -2,11 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"log"
 
-	"github.com/huykhuong/lol/internal/config"
-	"github.com/huykhuong/lol/internal/gemini"
-	"github.com/huykhuong/lol/internal/opgg"
 	"github.com/huykhuong/lol/internal/prompt"
 	"github.com/spf13/cobra"
 )
@@ -18,14 +14,16 @@ type AnalyzePromptData struct {
 
 var (
 	champion string
-	region   string
 )
 
 var analyzeCmd = &cobra.Command{
 	Use:   "analyze",
 	Short: "Perform an AI-powered strategic analysis",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := validate(); err != nil {
+		if err := validateParams(
+			requiredParams{name: "champion", value: champion, flag: "c"},
+			requiredParams{name: "region", value: region, flag: "r"},
+		); err != nil {
 			return err
 		}
 
@@ -35,7 +33,7 @@ var analyzeCmd = &cobra.Command{
 
 		data := AnalyzePromptData{
 			Champion: champion,
-			Region: region,
+			Region:   region,
 		}
 
 		prompt, err := prompt.ReadPrompt("analyze", data)
@@ -54,28 +52,6 @@ var analyzeCmd = &cobra.Command{
 
 		return nil
 	},
-}
-
-func validate() error {
-	if champion == "" {
-		return fmt.Errorf("champion name is required (use -c)")
-	}
-	
-	if region == "" {
-		return fmt.Errorf("region is required (use -r)")
-	}
-
-	return nil
-}
-
-func initializeClients(cmd *cobra.Command) (*opgg.Client, *gemini.Client) {
-	opggClient := opgg.NewClient(config.AppConfig.OPGGURL)
-	aiClient, err := gemini.NewClient(cmd.Context(), config.AppConfig.GeminiAPIKey)
-	if err != nil {
-		log.Fatalf("failed to initialize Gemini Client: %w", err)
-	}
-
-	return opggClient, aiClient
 }
 
 func init() {
